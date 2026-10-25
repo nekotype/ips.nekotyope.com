@@ -29,7 +29,7 @@ note と X への案内を目的とした、ビルド不要の静的サイトで
 5. 下記のDNS設定を行い、PagesのDNSチェックとHTTPS証明書の発行が完了したら **Enforce HTTPS** を有効にします。反映には時間がかかることがあります。
 6. https://ips.nekotype.com/ でPC・スマートフォン表示、note・Xへのリンク、共有画像を確認します。
 
-この作業ではGitHubへのアップロード、Pagesの有効化、DNSの変更は行っていません。
+公開先リポジトリ：https://github.com/nekotype/ips.nekotyope.com 。サイトのファイルはアップロード済みです。Pagesの有効化とDNSの変更は未実施です。リポジトリ名と独自ドメイン名は異なりますが、独自ドメインは `ips.nekotype.com` を使用します。
 
 ## 独自ドメインのDNS設定
 
