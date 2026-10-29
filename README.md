@@ -84,3 +84,42 @@ Resolve-DnsName ips.nekotype.com -Type CNAME
 
 
 導入時の検証（2026年10月29日）：ブラウザー上でGoogleタグを読み込み、`page_view` とnote・Xそれぞれの `click`（`outbound=true`）が生成されることを確認しました。検証イベントは送信直前に捕捉し、GA4には送っていません。GA4管理画面のレポート受信状況は未確認です。
+
+
+## 旧WordPress URLの案内と計測
+
+公開ルートの `404.html` をGitHub Pagesが存在しないURLに対して返します。HTTPステータスは404のままで、サーバー側の301リダイレクトは使いません。旧記事かどうかを判別する一覧はないため、旧記事以外の存在しないURLも同じ対象です。
+
+1. `window.location.pathname` を取得し、GA4の `legacy_url_visit` イベントの `legacy_path` に送信します。パスはブラウザーの値をそのまま使い、日本語などはパーセントエンコードされた形式になる場合があります。
+2. Googleタグを読み込む前にアドレスからクエリ・フラグメントを除外し、GA4の `page_location` もクエリのないURLに明示設定します。`page_referrer` は空にし、404ページのReferrer-Policyも `no-referrer` にしています。元のクエリをトップページの参照元として送らないための対策です。
+3. 404ページでもGoogleタグによる `page_view` が発生します。旧パス別の集計には専用の `legacy_url_visit` イベントを使用します。転送後のトップページは既存のGoogleタグで通常どおり計測し、トップページ側のコードは変更しません。
+4. イベントの処理コールバック後に100ms待って `location.replace('/')` で移動します。タグが読み込めない場合も約1.5秒で移動する独立したタイマーを設けています。送信・GA4側の受信は保証されません。バックグラウンドタブ等ではブラウザーのタイマー制限により長くなる場合があります。
+5. JavaScript無効時は自動転送・計測を行わず、常時表示しているトップページへのリンクを使えます。
+6. `noindex, nofollow` を設定しています。深い階層でも画像・リンクが壊れないよう、404ページではルートからの絶対パスを使います。
+
+### 公開後のテスト
+
+1. 実際に利用していた旧記事のURL（例：`https://ips.nekotype.com/2020/01/old-article/`）へアクセスします。存在しないテスト用パス `/__legacy-test__/sample-article/` でも確認できます。
+2. 約1.5秒以内を目安に `https://ips.nekotype.com/` へ移動することを確認します。ブラウザーの開発者ツールのNetworkで **Preserve log（ログを保持）** を有効にすると、元のリクエストが404、移動先が200であることを確認できます。
+3. GA4のリアルタイムレポートで `legacy_url_visit` を確認します。必要ならTag Assistantを使ってDebugViewでも確認できます。
+4. Networkで `collect` を検索し、`en=legacy_url_visit`、`tid=G-LGYK0YFJ6L`、`ep.legacy_path=/2020/01/old-article/` を確認します。パラメータはURLデコード後の値で読みます。
+5. クエリ除外の確認には `https://ips.nekotype.com/__legacy-test__/sample-article/?email=privacy-test%40example.invalid#test-fragment` のような **架空の値** を使用してください。イベントの `legacy_path` が `/__legacy-test__/sample-article/` のみであり、GA4への通信の `dl`（ページURL）、`dr`（参照元）や転送先にも、元のクエリ・フラグメントが含まれないことを確認します。実際の個人情報をテストに使わないでください。
+6. Googleタグのリクエストを開発者ツールでブロックしてもトップへ移動すること、JavaScriptを無効にすると404ページに留まって手動リンクで移動できることを確認します。
+7. 既存のトップページの `page_view` とnote・Xの `click` は従来どおりです。トップページや実在する `privacy.html` へのアクセスで `legacy_url_visit` が発生しないことも確認します。
+
+ローカルで `404.html` を直接開くと、元の旧記事パスでの検証にはなりません。`python -m http.server` も既定ではカスタム404を返さないため、任意パスからの転送は公開サイトまたは404フォールバック対応のテストサーバーで確認してください。
+
+`/?p=123` のように記事IDがクエリ文字列だけに含まれる旧URLは、トップページが存在するため404にならず、この仕組みの対象外です。クエリからの記事ID収集も行いません。トップページ側の既存GA4設定は変更していません。
+
+### GA4で旧記事パス別に集計する設定
+
+イベントの送信だけでは、`legacy_path` を通常のレポート・探索で使うためのカスタム定義は作成されません。GA4管理画面で次を一度登録します（編集者以上の権限が必要です）。
+
+1. **管理 → データの表示 → カスタム定義 → カスタムディメンションを作成** を開きます。
+2. ディメンション名：**旧記事パス**、範囲：**イベント**、イベントパラメータ：**`legacy_path`** で保存します。
+3. **探索 → 自由形式** で行に「旧記事パス」、値に「イベント数」を置き、イベント名が `legacy_url_visit` と完全一致する条件で絞り込みます。
+
+登録・データ収集後、レポートで利用できるまで24〜48時間かかる場合があります。管理画面にはこの作業環境からアクセスできないため、カスタムディメンションの登録は別途行ってください。
+
+公式資料：[GitHub Pagesのカスタム404](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-custom-404-page-for-your-github-pages-site)、[Googleタグのイベントコールバック](https://developers.google.com/tag-platform/gtagjs/reference/parameters)、[イベント単位のカスタムディメンション](https://support.google.com/analytics/answer/14239696?hl=ja)。
+
