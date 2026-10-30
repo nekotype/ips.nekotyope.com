@@ -22,3 +22,19 @@ main{margin:0 auto}
 .privacy-content a{color:#365ba8;text-underline-offset:4px}
 .privacy-date{color:var(--muted);font-size:17px}
 @media(max-width:640px){.privacy-content{padding-top:28px;font-size:20px}.privacy-content h1{font-size:30px}.privacy-content h2{font-size:23px}}
+
+
+/* Secondary links to personal tools and games. */
+.tools-line{margin:24px 0 0;text-align:center}
+.tools-link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:40px;padding:6px 2px;color:#596879;text-decoration:none;border-bottom:1px solid #dbe5ef;transition:color .2s,border-color .2s}
+.tools-name{font-size:18px;font-weight:600;letter-spacing:.02em}
+.tools-description{font-size:16px}
+.tools-link svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tools-link .tools-arrow{width:17px;height:17px;margin-left:2px}
+.game-links{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 28px;margin:8px auto -14px}
+.game-links a{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:6px 2px;border-bottom:1px solid #dbe5ef;color:#596879;font-size:16px;text-decoration:none;transition:color .2s,border-color .2s}
+.game-links svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.tools-link:hover,.game-links a:hover{color:#365ba8;border-color:#8aaed1}
+.tools-link:focus-visible,.game-links a:focus-visible{outline:3px solid #476be0;outline-offset:5px}
+@media(max-width:640px){.tools-line{margin-top:20px}.tools-link{gap:9px}.game-links{gap:4px 20px;margin-bottom:-10px}}
+@media(prefers-reduced-motion:reduce){.tools-link,.game-links a{transition:none}}
