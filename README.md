@@ -78,7 +78,7 @@ Resolve-DnsName ips.nekotype.com -Type CNAME
 - 管理画面で **管理 → データストリーム → 対象のウェブストリーム → 拡張計測機能 → 歯車 → 離脱クリック** がオンになっていることを確認してください。管理画面の項目名は表示言語により「外部リンクのクリック」等の場合があります。この設定はHTMLから有効化できません。
 - `note.com`・`x.com` をクロスドメイン測定の対象に追加しないでください。対象にすると離脱クリックの計測対象外になります。
 - 設定後はリアルタイムレポートで `page_view` と `click` を確認できます。広告ブロックやブラウザーの追跡防止機能により計測されない場合があります。
-- フッターからプライバシーポリシーへ移動できます。ポリシーページ自身には計測タグを設置していません。
+- フッターからプライバシーポリシーへ移動できます。プライバシーポリシーページにも同じ測定IDのタグを1つ設置し、ページビューを計測します。
 
 公式資料：[Googleタグの設置](https://developers.google.com/tag-platform/gtagjs)、[ページビュー計測](https://developers.google.com/analytics/devguides/collection/ga4/views)、[離脱クリックの計測](https://support.google.com/analytics/answer/13566436?hl=ja)。
 
@@ -123,3 +123,10 @@ Resolve-DnsName ips.nekotype.com -Type CNAME
 
 公式資料：[GitHub Pagesのカスタム404](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-custom-404-page-for-your-github-pages-site)、[Googleタグのイベントコールバック](https://developers.google.com/tag-platform/gtagjs/reference/parameters)、[イベント単位のカスタムディメンション](https://support.google.com/analytics/answer/14239696?hl=ja)。
 
+
+
+### 全ページのページビュー計測（2026年10月30日）
+
+`index.html`・`privacy.html`・`404.html` は同じ測定ID `G-LGYK0YFJ6L` で計測します。各HTMLのタグは1つで、`config` による自動 `page_view` を使い、手動 `page_view` は追加していません。SPAではなくページごとの通常のブラウザー遷移なので、履歴の監視や独自の画面遷移イベントも追加していません。404からトップへの転送では別々のページとしてそれぞれ1回計測し、既存の `legacy_url_visit` とクエリ除外処理は維持します。
+
+公開後はGA4のリアルタイムレポート、または開発者ツールのNetwork（ログ保持）で `/`・`/index.html`・`/privacy.html` を開き、`collect` 通信の `en=page_view`、`tid=G-LGYK0YFJ6L`、`dl` のページURLを確認してください。1回のページ読み込みにつき `page_view` が1件であることを確認します。広告ブロックやブラウザーの追跡防止機能によって計測されない場合があります。
